@@ -1,7 +1,8 @@
 datasource db {
     provider = "mysql"
     // mysql://username:password@localhost:port/database
-    url      = "mysql://root:root@localhost:8889/herbify"
+    // url      = "mysql://root:root@localhost:8889/herbify"
+    url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
 }
 
 generator client {
