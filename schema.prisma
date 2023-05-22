@@ -1,8 +1,8 @@
 datasource db {
     provider = "mysql"
     // mysql://username:password@localhost:port/database
-    // url      = "mysql://root:root@localhost:8889/herbify"
-    url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
+    url      = "mysql://root:root@localhost:8889/herbify"
+    // url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
 }
 
 generator client {
@@ -10,7 +10,24 @@ generator client {
 }
 
 model User {
-    id    Int    @id @default(autoincrement())
-    name  String
-    email String @unique
+    id         Int      @id @default(autoincrement())
+    name       String
+    photo      String
+    email      String   @unique
+    password   String
+    status     Int      @default(0)
+    verifiedAt DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    Otp        Otp[]
+}
+
+model Otp {
+    id        Int      @id @default(autoincrement())
+    code      Int?
+    userId    Int
+    expiredAt DateTime
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    user      User     @relation(fields: [userId], references: [id])
 }

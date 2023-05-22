@@ -1,9 +1,10 @@
 const express = require("express");
-const app = express();
+const bodyParser = require("body-parser");
 const router = require("./routes/index");
 
-const port = 8000;
+const app = express();
 
+app.use(bodyParser.json());
 app.use("/api", router);
 
 app.get("/", (req, res) => {
@@ -12,6 +13,7 @@ app.get("/", (req, res) => {
   });
 });
 
+const port = 8000;
 app.listen(port, (req, res) => {
   console.log(`Server running on port ${port}`);
 });
