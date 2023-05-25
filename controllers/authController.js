@@ -2,7 +2,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const { generateToken, verifyToken } = require("../services/auth");
 const prisma = require("../prisma");
-const emailConfirmation = require("../services/mailer");
+const sendEmailOTP = require("../services/mailer");
 
 class AuthController {
   static async authenticateToken(req, res, next) {
@@ -67,10 +67,12 @@ class AuthController {
       const data = await prisma.user.create({
         data: {
           name,
+          photo: "default.jpg",
           email,
           password: hashPassword,
         },
       });
+      await sendEmailOTP(data.email);
 
       res.status(201).json({
         message: "User has been created",
@@ -137,18 +139,100 @@ class AuthController {
       });
     }
   }
+  static async requestOTP(req, res) {
+    try {
+      const { id } = req.params;
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: {
+          id: Number(id),
+        },
+      });
+      const data = await sendEmailOTP(user.email);
+
+      res.status(201).json({
+        message: `Successfully generate and send email for OTP with userId = ${id}`,
+        email: user.email,
+        data,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "[Error]:requestOTP",
+        error: error.message,
+      });
+    }
+  }
   static async getOTP(req, res) {
     try {
-      const { email } = req.query;
-      const data = await emailConfirmation(email);
+      const { id } = req.params;
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: {
+          id: Number(id),
+        },
+      });
+
+      const data = await prisma.otp.findFirst({
+        where: {
+          userId: user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
       res.json({
-        message: "Success",
+        message: `Successfully get OTP with userId = ${id}`,
         data,
       });
     } catch (error) {
       res.status(500).json({
         message: "[Error]:getOTP",
+        error: error.message,
+      });
+    }
+  }
+  static async verifyOTP(req, res) {
+    try {
+      const { email, code } = req.body;
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: {
+          email,
+        },
+      });
+
+      const otp = await prisma.otp.findFirst({
+        where: {
+          userId: user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      if (code != otp.code) {
+        return res.status(400).json({
+          message: "OTP Invalid",
+        });
+      }
+
+      const data = await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          status: Number(1),
+        },
+      });
+
+      res.status(200).json({
+        message: "Successfully verified an account",
+        data,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "[Error]:verifyOTP",
         error: error.message,
       });
     }
