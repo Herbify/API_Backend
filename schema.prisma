@@ -1,7 +1,7 @@
 datasource db {
     provider = "mysql"
     // mysql://username:password@localhost:port/database
-    url      = "mysql://root:root@localhost:8889/herbify"
+    url      = "mysql://root:@localhost:3306/herbify"
 }
 
 generator client {
@@ -12,4 +12,37 @@ model User {
     id    Int    @id @default(autoincrement())
     name  String
     email String @unique
+}
+
+model Articles {
+    id        Int      @id @default(autoincrement())
+    idUser    Int
+    title     String
+    photo     String?
+    content   String
+    tag       Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model products {
+    id         Int      @id @default(autoincrement())
+    name       String
+    ingredient Json
+    price      Int
+    location   String
+    url        String?
+    photo      String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @default(now())
+}
+
+model userActivities {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    type      String
+    activity  Json
+    status    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
 }
