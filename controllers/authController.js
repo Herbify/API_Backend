@@ -196,6 +196,12 @@ class AuthController {
     try {
       const { email, code } = req.body;
 
+      if (!email || !code) {
+        return res.status(400).json({
+          message: "You must fill in email and code",
+        });
+      }
+
       const user = await prisma.user.findFirstOrThrow({
         where: {
           email,
