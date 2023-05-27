@@ -9,7 +9,7 @@ app.use("/api", router);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "API Herbify",
+    message: "Welcome to API Herbify",
   });
 });
 
