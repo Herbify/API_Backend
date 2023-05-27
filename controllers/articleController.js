@@ -58,7 +58,7 @@ const getArticleById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await prisma.articles.findFirst({
+    const data = await prisma.articles.findFirstOrThrow({
       where: {
         id: Number(id),
       },
@@ -161,7 +161,7 @@ const createArticle = async (req, res) => {
           reject(error);
         });
       });
-      
+
       blobStream.end(req.file.buffer);
       // Tunggu hingga publicUrl tersedia
       publicUrl = await uploadToStorage;
@@ -175,7 +175,7 @@ const createArticle = async (req, res) => {
         tag: JSON.parse(tag),
       },
     });
-    
+
     res.status(201).json({
       message: `Success create article`,
       data,
@@ -240,12 +240,12 @@ const editArticle = async (req, res) => {
           return res.status(500).json({ message: 'An error occurred while uploading the file.' });
         });
       });
-      
+
       blobStream.end(req.file.buffer);
       // Tunggu hingga publicUrl tersedia
       publicUrl = await uploadToStorage;
     }
-    
+
     //Mengupdate article dengan Prisma berdasarkan ID
     const data = await prisma.articles.update({
       where: {
@@ -257,10 +257,9 @@ const editArticle = async (req, res) => {
         content,
         photo: publicUrl,
         tag: JSON.parse(tag),
-        updatedAt: new Date(),
       },
     });
-    
+
     res.status(201).json({
       message: `Success edit article = ${id}`,
       data,
@@ -355,7 +354,7 @@ const likeArticle = async (req, res) => {
       })
     }
 
-    const userActivity = await prisma.userActivities.findFirst({
+    const userActivity = await prisma.userActivities.findFirstOrThrow({
       where: {
         AND: [
           {
@@ -396,7 +395,6 @@ const likeArticle = async (req, res) => {
           },
           data: {
             status: 1,
-            updatedAt: new Date(),
           }
         });
 
@@ -411,7 +409,6 @@ const likeArticle = async (req, res) => {
           },
           data: {
             status: 0,
-            updatedAt: new Date(),
           }
         });
 

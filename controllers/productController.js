@@ -23,7 +23,7 @@ const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const data = await prisma.products.findFirst({
+        const data = await prisma.products.findFirstOrThrow({
             where: {
                 id: Number(id),
             },
@@ -86,7 +86,6 @@ const editProduct = async (req, res) => {
                 location,
                 url,
                 photo,
-                updatedAt: new Date(),
             },
         });
 
@@ -125,7 +124,7 @@ const deleteProduct = async (req, res) => {
 
 const getProductByIngredient = async (req, res) => {
     try {
-        const id = req.query.id;
+        const { id } = req.query;
 
         const data = await prisma.products.findMany({
             where: {

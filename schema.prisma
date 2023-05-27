@@ -22,7 +22,7 @@ model Articles {
     content   String
     tag       Json?
     createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
+    updatedAt DateTime 
 }
 
 model products {
@@ -34,7 +34,7 @@ model products {
     url        String?
     photo      String
     createdAt  DateTime @default(now())
-    updatedAt  DateTime @default(now())
+    updatedAt  DateTime 
 }
 
 model userActivities {
@@ -44,5 +44,5 @@ model userActivities {
     activity  Json
     status    Int
     createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
+    updatedAt DateTime 
 }
