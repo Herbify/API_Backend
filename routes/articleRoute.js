@@ -1,7 +1,6 @@
 const express = require("express");
 const articleRoute = express.Router();
 const { getAllArticle, getArticleById, createArticle, editArticle, deleteArticle, getAllArticleByUserId, likeArticle } = require("../controllers/articleController");
-const Multer = require("multer");
 
 articleRoute.get("/", getAllArticle);
 articleRoute.get("/:id", getArticleById);

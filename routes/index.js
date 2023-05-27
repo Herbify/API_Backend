@@ -2,8 +2,6 @@ const express = require("express");
 const userRoute = require("./userRoute");
 const articleRoute = require("./articleRoute");
 const productRoute = require("./productRoute");
-const bodyParser = require('body-parser');
-const Multer = require("multer");
 
 const router = express.Router();
 
