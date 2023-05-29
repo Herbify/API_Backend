@@ -9,9 +9,26 @@ generator client {
 }
 
 model User {
-    id    Int    @id @default(autoincrement())
-    name  String
-    email String @unique
+    id         Int      @id @default(autoincrement())
+    name       String
+    photo      String
+    email      String   @unique
+    password   String
+    status     Int      @default(0)
+    verifiedAt DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    Otp        Otp[]
+}
+
+model Otp {
+    id        Int      @id @default(autoincrement())
+    code      Int?
+    userId    Int
+    expiredAt DateTime
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    user      User     @relation(fields: [userId], references: [id])
 }
 
 model Articles {
@@ -25,7 +42,7 @@ model Articles {
     updatedAt DateTime 
 }
 
-model products {
+model Products {
     id         Int      @id @default(autoincrement())
     name       String
     ingredient Json
@@ -37,7 +54,40 @@ model products {
     updatedAt  DateTime 
 }
 
-model userActivities {
+model UserActivities {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    type      String
+    activity  Json
+    status    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime 
+}
+
+model Articles {
+    id        Int      @id @default(autoincrement())
+    idUser    Int
+    title     String
+    photo     String?
+    content   String
+    tag       Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime 
+}
+
+model Products {
+    id         Int      @id @default(autoincrement())
+    name       String
+    ingredient Json
+    price      Int
+    location   String
+    url        String?
+    photo      String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime 
+}
+
+model UserActivities {
     id        Int      @id @default(autoincrement())
     userId    Int
     type      String
