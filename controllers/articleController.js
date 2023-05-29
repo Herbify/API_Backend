@@ -4,7 +4,6 @@ const { Storage } = require('@google-cloud/storage')
 const util = require("util");
 const Multer = require("multer");
 const path = require("path");
-const { json } = require("body-parser");
 
 const storage = new Storage({
   projectId: 'herbify-387103',
@@ -354,7 +353,7 @@ const likeArticle = async (req, res) => {
       })
     }
 
-    const userActivity = await prisma.userActivities.findFirstOrThrow({
+    const userActivity = await prisma.userActivities.findFirst({
       where: {
         AND: [
           {
