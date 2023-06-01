@@ -1,8 +1,7 @@
 datasource db {
     provider = "mysql"
-    // mysql://username:password@localhost:port/database
-    // url      = "mysql://root:root@localhost:8889/herbify"
-    url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
+    url      = "mysql://root:root@localhost:8889/herbify"
+    // url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
 }
 
 generator client {
@@ -37,8 +36,40 @@ model Herbal {
     name           String
     scientificName String?
     image          String?
-    description    String?
+    description    String?  @db.Text
     benefit        String?
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
+}
+
+model Product {
+    id          Int      @id @default(autoincrement())
+    name        String
+    description String   @db.Text
+    image       String?
+    ingredients String
+    link        String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model UserActivities {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    type      String
+    activity  Json
+    status    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime
+}
+
+model Articles {
+    id        Int      @id @default(autoincrement())
+    idUser    Int
+    title     String
+    photo     String?
+    content   String
+    tag       Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime
 }

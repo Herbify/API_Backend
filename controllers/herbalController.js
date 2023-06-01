@@ -3,7 +3,13 @@ const prisma = require("../prisma");
 class HerbalController {
   static async getHerbalList(req, res) {
     try {
-      const data = await prisma.herbal.findMany();
+      const { limit = 10, page = 1 } = req.query;
+
+      const offset = (page - 1) * limit;
+      const data = await prisma.herbal.findMany({
+        take: Number(limit),
+        skip: Number(offset),
+      });
 
       res.status(200).json({
         message: "Successfully get all herbal data",
