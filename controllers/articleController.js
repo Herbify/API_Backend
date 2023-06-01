@@ -63,7 +63,7 @@ class ArticleController {
       }
 
       res.status(200).json({
-        message: "Successfully ger all article",
+        message: "Successfully get all article",
         data,
       });
     } catch (error) {
