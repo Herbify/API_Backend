@@ -1,9 +1,6 @@
 datasource db {
     provider = "mysql"
-    url      = "mysql://sql12623014:t59kIwZhIt@localhost:3306/sql12623014"
-    // url      = "mysql://sql12623014:t59kIwZhIt@sql12.freemysqlhosting.net:3306/sql12623014"
-    // url      = "mysql://root:root@localhost:8889/herbify"
-    // url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
+    url      = env("DATABASE_URL")
 }
 
 generator client {
