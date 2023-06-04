@@ -13,6 +13,8 @@ class ProductController {
 
       res.status(200).json({
         message: "Successfully get all product list",
+        limit: Number(limit),
+        page: Number(page),
         data,
       });
     } catch (error) {
