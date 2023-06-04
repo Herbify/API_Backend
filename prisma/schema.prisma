@@ -72,3 +72,34 @@ model Articles {
     createdAt DateTime @default(now())
     updatedAt DateTime
 }
+
+model Doctor {
+    id         Int       @id @default(autoincrement())
+    name       String
+    photo      String?
+    email      String    @unique
+    password   String?
+    status     Int       @default(0)
+    verifiedAt DateTime?
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+}
+
+model MessageGroup {
+    id        Int      @id @default(autoincrement())
+    group     Int
+    status    Int      @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Message {
+    id             Int      @id @default(autoincrement())
+    messageGroupId Int
+    sender         Int
+    recipient      Int
+    fromUser       Boolean  @default(true)
+    content        String?  @db.Text
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+}
