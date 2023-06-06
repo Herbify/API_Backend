@@ -59,7 +59,7 @@ model UserActivities {
     activity  Json
     status    Int
     createdAt DateTime @default(now())
-    updatedAt DateTime
+    updatedAt DateTime @updatedAt
 }
 
 model Articles {
@@ -70,7 +70,7 @@ model Articles {
     content   String
     tag       Json?
     createdAt DateTime @default(now())
-    updatedAt DateTime
+    updatedAt DateTime @updatedAt
 }
 
 model Doctor {
