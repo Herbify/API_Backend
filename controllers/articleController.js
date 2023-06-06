@@ -1,6 +1,10 @@
-const { PrismaClient } = require("@prisma/client");
+const {
+  PrismaClient
+} = require("@prisma/client");
 const prisma = new PrismaClient();
-const { Storage } = require("@google-cloud/storage");
+const {
+  Storage
+} = require("@google-cloud/storage");
 const Multer = require("multer");
 const path = require("path");
 
@@ -43,8 +47,7 @@ class ArticleController {
       for (const article of articles) {
         let like = await prisma.userActivities.count({
           where: {
-            AND: [
-              {
+            AND: [{
                 activity: {
                   path: "$.articleId",
                   equals: Number(article.id),
@@ -77,7 +80,9 @@ class ArticleController {
 
   static async getArticleById(req, res) {
     try {
-      const { id } = req.params;
+      const {
+        id
+      } = req.params;
 
       const data = await prisma.articles.findFirstOrThrow({
         where: {
@@ -87,8 +92,7 @@ class ArticleController {
 
       const like = await prisma.userActivities.count({
         where: {
-          AND: [
-            {
+          AND: [{
               activity: {
                 path: "$.articleId",
                 equals: Number(id),
@@ -122,14 +126,22 @@ class ArticleController {
           if (err) {
             return res
               .status(400)
-              .json({ message: err.message, from: "PhotoValidation" });
+              .json({
+                message: err.message,
+                from: "PhotoValidation"
+              });
           } else {
             resolve();
           }
         });
       });
 
-      const { idUser, title, content, tag } = req.body;
+      const {
+        idUser,
+        title,
+        content,
+        tag
+      } = req.body;
       let publicUrl;
 
       if (!idUser) {
@@ -166,7 +178,9 @@ class ArticleController {
             console.error(error);
             return res
               .status(500)
-              .json({ message: "An error occurred while uploading the file." });
+              .json({
+                message: "An error occurred while uploading the file."
+              });
             reject(error);
           });
         });
@@ -205,16 +219,26 @@ class ArticleController {
           if (err) {
             return res
               .status(400)
-              .json({ message: err.message, from: "PhotoValidation" });
+              .json({
+                message: err.message,
+                from: "PhotoValidation"
+              });
           } else {
             resolve();
           }
         });
       });
 
-      const { id } = req.params;
+      const {
+        id
+      } = req.params;
 
-      const { idUser, title, content, tag } = req.body;
+      const {
+        idUser,
+        title,
+        content,
+        tag
+      } = req.body;
       let publicUrl;
 
       if (req.file) {
@@ -257,7 +281,9 @@ class ArticleController {
             reject(error);
             return res
               .status(500)
-              .json({ message: "An error occurred while uploading the file." });
+              .json({
+                message: "An error occurred while uploading the file."
+              });
           });
         });
 
@@ -266,6 +292,12 @@ class ArticleController {
         publicUrl = await uploadToStorage;
       }
 
+      const getArticle = await prisma.articles.findFirst({
+        where: {
+          id: Number(id)
+        }
+      });
+      const tagValue = tag ? JSON.parse(tag) : getArticle.tag;
       //Mengupdate article dengan Prisma berdasarkan ID
       const data = await prisma.articles.update({
         where: {
@@ -276,7 +308,7 @@ class ArticleController {
           title,
           content,
           photo: publicUrl,
-          tag: JSON.parse(tag),
+          tag: tagValue,
         },
       });
 
@@ -295,7 +327,9 @@ class ArticleController {
 
   static async deleteArticle(req, res) {
     try {
-      const { id } = req.params;
+      const {
+        id
+      } = req.params;
 
       // Delete article dengan Prisma berdasarkan ID
       const data = await prisma.articles.delete({
@@ -326,7 +360,9 @@ class ArticleController {
 
   static async getAllArticleByUserId(req, res) {
     try {
-      const { id } = req.params;
+      const {
+        id
+      } = req.params;
 
       let data = [];
       const articles = await prisma.articles.findMany({
@@ -338,8 +374,7 @@ class ArticleController {
       for (const article of articles) {
         let like = await prisma.userActivities.count({
           where: {
-            AND: [
-              {
+            AND: [{
                 activity: {
                   path: "$.articleId",
                   equals: Number(article.id),
@@ -372,8 +407,12 @@ class ArticleController {
 
   static async likeArticle(req, res) {
     try {
-      const { id } = req.params;
-      const { userId } = req.query;
+      const {
+        id
+      } = req.params;
+      const {
+        userId
+      } = req.query;
 
       if (!userId) {
         return res.status(400).json({
@@ -383,8 +422,7 @@ class ArticleController {
 
       const userActivity = await prisma.userActivities.findFirst({
         where: {
-          AND: [
-            {
+          AND: [{
               userId: Number(userId),
             },
             {
