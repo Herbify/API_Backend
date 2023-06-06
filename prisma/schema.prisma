@@ -67,7 +67,7 @@ model Articles {
     idUser    Int
     title     String
     photo     String?
-    content   String
+    content   String?  @db.Text
     tag       Json?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
