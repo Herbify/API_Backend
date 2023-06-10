@@ -1,20 +1,16 @@
 const prisma = require("../prisma");
 const Multer = require("multer");
 const path = require("path");
-const {
-  Storage
-} = require('@google-cloud/storage');
+const { Storage } = require("@google-cloud/storage");
 
 const storage = new Storage({
-  keyFilename: './cloud-storage-configuration.json',
+  keyFilename: "./cloud-storage-configuration.json",
 });
 
 class HerbalController {
   static async getHerbalList(req, res) {
     try {
-      const {
-        limit = 10, page = 1
-      } = req.query;
+      const { limit = 10, page = 1 } = req.query;
 
       const offset = (page - 1) * limit;
       const data = await prisma.herbal.findMany({
@@ -37,9 +33,7 @@ class HerbalController {
   }
   static async getHerbalById(req, res) {
     try {
-      const {
-        id
-      } = req.params;
+      const { id } = req.params;
 
       const herbalData = await prisma.herbal.findFirstOrThrow({
         select: {
@@ -58,7 +52,9 @@ class HerbalController {
       });
 
       const benefit = herbalData.benefit;
-      const dataArray = benefit.split(",").map((item) => item.trim());
+      const dataArray = benefit
+        ? benefit.split(",").map((item) => item.trim())
+        : [];
       const jsonObject = {};
 
       for (let i = 0; i < dataArray.length; i++) {
@@ -67,9 +63,11 @@ class HerbalController {
       const jsonData = JSON.stringify(jsonObject, null, 2);
       const benefitData = JSON.parse(jsonData);
 
-      const data = Object.assign(herbalData, {
-        benefit: benefitData
-      });
+      const data = benefit
+        ? Object.assign(herbalData, {
+            benefit: benefitData,
+          })
+        : herbalData;
 
       res.status(200).json({
         message: `Successfully get herbal with id = ${id}`,
@@ -84,12 +82,7 @@ class HerbalController {
   }
   static async addHerbal(req, res) {
     try {
-      const {
-        name,
-        scientificName,
-        description,
-        benefit,
-      } = req.body;
+      const { name, scientificName, description, benefit } = req.body;
 
       if (!name) {
         return res.status(400).json({
@@ -107,9 +100,10 @@ class HerbalController {
         });
       }
 
-      let image = 'https://storage.googleapis.com/herbify/herbal/default-herbal.jpeg';
+      let image =
+        "https://storage.googleapis.com/herbify/herbal/default-herbal.jpeg";
       if (req.file) {
-        const bucketName = 'herbify';
+        const bucketName = "herbify";
         const fileName = `herbal/${Date.now()}`;
         const storageBucket = storage.bucket(bucketName);
         const file = storageBucket.file(fileName);
@@ -145,15 +139,8 @@ class HerbalController {
   }
   static async updateHerbalById(req, res) {
     try {
-      const {
-        id
-      } = req.params;
-      const {
-        name,
-        scientificName,
-        description,
-        benefit
-      } = req.body;
+      const { id } = req.params;
+      const { name, scientificName, description, benefit } = req.body;
 
       if (!req.file) {
         const data = await prisma.herbal.update({
@@ -172,7 +159,7 @@ class HerbalController {
           data,
         });
       } else {
-        const bucketName = 'herbify';
+        const bucketName = "herbify";
         const fileName = `herbal/${Date.now()}`;
         const storageBucket = storage.bucket(bucketName);
         const file = storageBucket.file(fileName);
@@ -203,6 +190,50 @@ class HerbalController {
     } catch (error) {
       res.status(500).json({
         message: "[Error]:updateHerbalById",
+        error: error.message,
+      });
+    }
+  }
+  static async searchHerbalByKeyword(req, res) {
+    try {
+      const { keyword, limit = 10, page = 1 } = req.query;
+      const offset = (page - 1) * limit;
+
+      if (!keyword) {
+        return res.status(400).json({
+          message: "Input your keyword!",
+        });
+      }
+
+      const data = await prisma.herbal.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: keyword,
+              },
+            },
+            {
+              scientificName: {
+                contains: keyword,
+              },
+            },
+          ],
+        },
+        take: Number(limit),
+        skip: Number(offset),
+      });
+
+      res.status(200).json({
+        message: "Successfully search herbal data",
+        keyword,
+        limit: Number(limit),
+        page: Number(offset),
+        data,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "[Error]:searchHerbalByKeyword",
         error: error.message,
       });
     }

@@ -7,7 +7,12 @@ const upload = multer();
 
 herbalRoute.get("/", HerbalController.getHerbalList);
 herbalRoute.post("/", upload.single("image"), HerbalController.addHerbal);
+herbalRoute.get("/search", HerbalController.searchHerbalByKeyword);
 herbalRoute.get("/:id", HerbalController.getHerbalById);
-herbalRoute.put("/:id", upload.single("image"), HerbalController.updateHerbalById);
+herbalRoute.put(
+  "/:id",
+  upload.single("image"),
+  HerbalController.updateHerbalById
+);
 
 module.exports = herbalRoute;
