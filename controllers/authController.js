@@ -1,9 +1,6 @@
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const {
-  generateToken,
-  verifyToken
-} = require("../services/auth");
+const { generateToken, verifyToken } = require("../services/auth");
 const prisma = require("../prisma");
 const sendEmailOTP = require("../services/mailer");
 
@@ -15,7 +12,7 @@ class AuthController {
 
       if (token === null) {
         return res.status(401).json({
-          message: "Unauthorized"
+          message: "Unauthorized",
         });
       }
 
@@ -25,17 +22,13 @@ class AuthController {
       next();
     } catch (error) {
       res.status(403).json({
-        message: "Invalid token"
+        message: "Invalid token",
       });
     }
   }
   static async userRegistration(req, res) {
     try {
-      const {
-        name,
-        email,
-        password
-      } = req.body;
+      const { name, email, password } = req.body;
 
       if (!name) {
         return res.status(400).json({
@@ -57,9 +50,11 @@ class AuthController {
           message: "Password is required",
         });
       }
-      if (!validator.isLength(password, {
-          min: 6
-        })) {
+      if (
+        !validator.isLength(password, {
+          min: 6,
+        })
+      ) {
         return res.status(400).json({
           message: "Password must be at least 6 characters",
         });
@@ -100,10 +95,7 @@ class AuthController {
   }
   static async userLogin(req, res) {
     try {
-      const {
-        email,
-        password
-      } = req.body;
+      const { email, password, type = "manual" } = req.body;
 
       if (!email) {
         return res.status(400).json({
@@ -115,7 +107,7 @@ class AuthController {
           message: "Email format is invalid",
         });
       }
-      if (!password) {
+      if (!password && type == "manual") {
         return res.status(400).json({
           message: "Password is required",
         });
@@ -123,7 +115,7 @@ class AuthController {
 
       const data = await prisma.user.findFirst({
         where: {
-          email
+          email,
         },
       });
       if (!data) {
@@ -132,19 +124,18 @@ class AuthController {
         });
       }
 
-      const verifyPassword = await bcrypt.compare(password, data.password);
-      if (!verifyPassword) {
-        return res.status(400).json({
-          message: "Password is incorrect",
-        });
+      if (type != "google") {
+        const verifyPassword = await bcrypt.compare(password, data.password);
+        if (!verifyPassword) {
+          return res.status(400).json({
+            message: "Password is incorrect",
+          });
+        }
       }
 
       const accessToken = await generateToken({
         id: data.id,
         email: data.email,
-      });
-      console.log({
-        accessToken
       });
 
       res.status(200).json({
@@ -161,9 +152,7 @@ class AuthController {
   }
   static async requestOTP(req, res) {
     try {
-      const {
-        id
-      } = req.params;
+      const { id } = req.params;
 
       const user = await prisma.user.findFirstOrThrow({
         where: {
@@ -186,9 +175,7 @@ class AuthController {
   }
   static async getOTP(req, res) {
     try {
-      const {
-        id
-      } = req.params;
+      const { id } = req.params;
 
       const user = await prisma.user.findFirstOrThrow({
         where: {
@@ -218,10 +205,7 @@ class AuthController {
   }
   static async verifyOTP(req, res) {
     try {
-      const {
-        email,
-        code
-      } = req.body;
+      const { email, code } = req.body;
 
       if (!email || !code) {
         return res.status(400).json({
