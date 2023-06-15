@@ -107,3 +107,11 @@ model Message {
     updatedAt      DateTime     @updatedAt
     messageGroup   MessageGroup @relation(fields: [messageGroupId], references: [id])
 }
+
+model Chatbot {
+    id        Int      @id @default(autoincrement())
+    question  String   @db.LongText
+    answer    String?  @db.LongText
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
