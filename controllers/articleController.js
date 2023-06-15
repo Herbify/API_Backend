@@ -42,20 +42,26 @@ class ArticleController {
     try {
       let data = [];
 
-      const articles = await prisma.articles.findMany();
+      const { limit = 10, page = 1 } = req.query;
+      const offset = (page - 1) * limit;
+
+      const articles = await prisma.articles.findMany({
+        take: Number(limit),
+        skip: Number(offset),
+      });
 
       for (const article of articles) {
         let like = await prisma.userActivities.count({
           where: {
             AND: [{
-                activity: {
-                  path: "$.articleId",
-                  equals: Number(article.id),
-                },
+              activity: {
+                path: "$.articleId",
+                equals: Number(article.id),
               },
-              {
-                status: 1,
-              },
+            },
+            {
+              status: 1,
+            },
             ],
           },
         });
@@ -67,6 +73,8 @@ class ArticleController {
 
       res.status(200).json({
         message: "Successfully get all article",
+        limit: Number(limit),
+        page: Number(page),
         data,
       });
     } catch (error) {
@@ -93,14 +101,14 @@ class ArticleController {
       const like = await prisma.userActivities.count({
         where: {
           AND: [{
-              activity: {
-                path: "$.articleId",
-                equals: Number(id),
-              },
+            activity: {
+              path: "$.articleId",
+              equals: Number(id),
             },
-            {
-              status: 1,
-            },
+          },
+          {
+            status: 1,
+          },
           ],
         },
       });
@@ -360,33 +368,38 @@ class ArticleController {
 
   static async getAllArticleByUserId(req, res) {
     try {
-      const {
-        id
-      } = req.params;
+      const { id } = req.params;
+
+      const { limit = 10, page = 1 } = req.query;
+      const offset = (page - 1) * limit;
 
       let data = [];
       const articles = await prisma.articles.findMany({
         where: {
           idUser: Number(id),
         },
+        take: Number(limit),
+        skip: Number(offset),
       });
 
       for (const article of articles) {
         let like = await prisma.userActivities.count({
           where: {
             AND: [{
-                activity: {
-                  path: "$.articleId",
-                  equals: Number(article.id),
-                },
+              activity: {
+                path: "$.articleId",
+                equals: Number(article.id),
               },
-              {
-                status: 1,
-              },
+            },
+            {
+              status: 1,
+            },
             ],
           },
         });
         data.push({
+          limit: Number(limit),
+          page: Number(page),
           article,
           numLike: like,
         });
@@ -423,14 +436,14 @@ class ArticleController {
       const userActivity = await prisma.userActivities.findFirst({
         where: {
           AND: [{
-              userId: Number(userId),
+            userId: Number(userId),
+          },
+          {
+            activity: {
+              path: "$.articleId",
+              equals: Number(id),
             },
-            {
-              activity: {
-                path: "$.articleId",
-                equals: Number(id),
-              },
-            },
+          },
           ],
         },
       });
