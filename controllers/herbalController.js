@@ -1,12 +1,27 @@
 const prisma = require("../prisma");
+const Multer = require("multer");
+const path = require("path");
+const { Storage } = require("@google-cloud/storage");
+
+const storage = new Storage({
+  keyFilename: "./cloud-storage-configuration.json",
+});
 
 class HerbalController {
   static async getHerbalList(req, res) {
     try {
-      const data = await prisma.herbal.findMany();
+      const { limit = 10, page = 1 } = req.query;
+
+      const offset = (page - 1) * limit;
+      const data = await prisma.herbal.findMany({
+        take: Number(limit),
+        skip: Number(offset),
+      });
 
       res.status(200).json({
         message: "Successfully get all herbal data",
+        limit: Number(limit),
+        page: Number(page),
         data,
       });
     } catch (error) {
@@ -37,7 +52,9 @@ class HerbalController {
       });
 
       const benefit = herbalData.benefit;
-      const dataArray = benefit.split(",").map((item) => item.trim());
+      const dataArray = benefit
+        ? benefit.split(",").map((item) => item.trim())
+        : [];
       const jsonObject = {};
 
       for (let i = 0; i < dataArray.length; i++) {
@@ -46,7 +63,11 @@ class HerbalController {
       const jsonData = JSON.stringify(jsonObject, null, 2);
       const benefitData = JSON.parse(jsonData);
 
-      const data = Object.assign(herbalData, { benefit: benefitData });
+      const data = benefit
+        ? Object.assign(herbalData, {
+            benefit: benefitData,
+          })
+        : herbalData;
 
       res.status(200).json({
         message: `Successfully get herbal with id = ${id}`,
@@ -61,13 +82,7 @@ class HerbalController {
   }
   static async addHerbal(req, res) {
     try {
-      const {
-        name,
-        scientificName,
-        image = "herbal-default.jpg",
-        description,
-        benefit,
-      } = req.body;
+      const { name, scientificName, description, benefit } = req.body;
 
       if (!name) {
         return res.status(400).json({
@@ -83,6 +98,22 @@ class HerbalController {
         return res.status(400).json({
           message: "Description herbal is required",
         });
+      }
+
+      let image =
+        "https://storage.googleapis.com/herbify/herbal/default-herbal.jpeg";
+      if (req.file) {
+        const bucketName = "herbify";
+        const fileName = `herbal/${Date.now()}`;
+        const storageBucket = storage.bucket(bucketName);
+        const file = storageBucket.file(fileName);
+
+        await file.save(req.file.buffer, {
+          metadata: {
+            contentType: req.file.mimetype,
+          },
+        });
+        image = `https://storage.googleapis.com/herbify/${fileName}`;
       }
 
       const data = await prisma.herbal.create({
@@ -109,13 +140,100 @@ class HerbalController {
   static async updateHerbalById(req, res) {
     try {
       const { id } = req.params;
+      const { name, scientificName, description, benefit } = req.body;
 
-      res.status(201).json({
-        message: `Successfully update herbal data with id = ${id}`,
-      });
+      if (!req.file) {
+        const data = await prisma.herbal.update({
+          where: {
+            id: Number(id),
+          },
+          data: {
+            name,
+            scientificName,
+            description,
+            benefit,
+          },
+        });
+        return res.status(201).json({
+          message: `Successfully update herbal without image and id = ${id}`,
+          data,
+        });
+      } else {
+        const bucketName = "herbify";
+        const fileName = `herbal/${Date.now()}`;
+        const storageBucket = storage.bucket(bucketName);
+        const file = storageBucket.file(fileName);
+
+        await file.save(req.file.buffer, {
+          metadata: {
+            contentType: req.file.mimetype,
+          },
+        });
+
+        const data = await prisma.herbal.update({
+          where: {
+            id: Number(id),
+          },
+          data: {
+            name,
+            scientificName,
+            image: `https://storage.googleapis.com/herbify/${fileName}`,
+            description,
+            benefit,
+          },
+        });
+        return res.status(201).json({
+          message: `Successfully update herbal with image and id = ${id}`,
+          data,
+        });
+      }
     } catch (error) {
       res.status(500).json({
         message: "[Error]:updateHerbalById",
+        error: error.message,
+      });
+    }
+  }
+  static async searchHerbalByKeyword(req, res) {
+    try {
+      const { keyword, limit = 10, page = 1 } = req.query;
+      const offset = (page - 1) * limit;
+
+      if (!keyword) {
+        return res.status(400).json({
+          message: "Input your keyword!",
+        });
+      }
+
+      const data = await prisma.herbal.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: keyword,
+              },
+            },
+            {
+              scientificName: {
+                contains: keyword,
+              },
+            },
+          ],
+        },
+        take: Number(limit),
+        skip: Number(offset),
+      });
+
+      res.status(200).json({
+        message: "Successfully search herbal data",
+        keyword,
+        limit: Number(limit),
+        page: Number(offset),
+        data,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "[Error]:searchHerbalByKeyword",
         error: error.message,
       });
     }

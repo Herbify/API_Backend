@@ -1,8 +1,6 @@
 datasource db {
     provider = "mysql"
-    // mysql://username:password@localhost:port/database
-    // url      = "mysql://root:root@localhost:8889/herbify"
-    url      = "mysql://root:herbify-bangkit-2023*@34.128.126.11:3306/herbify"
+    url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -37,8 +35,83 @@ model Herbal {
     name           String
     scientificName String?
     image          String?
-    description    String?
+    description    String?  @db.Text
     benefit        String?
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
+}
+
+model Product {
+    id          Int      @id @default(autoincrement())
+    name        String
+    description String   @db.Text
+    image       String?
+    ingredients String
+    link        String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model UserActivities {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    type      String
+    activity  Json
+    status    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Articles {
+    id        Int      @id @default(autoincrement())
+    idUser    Int
+    title     String
+    photo     String?
+    content   String?  @db.Text
+    tag       Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Doctor {
+    id         Int       @id @default(autoincrement())
+    name       String
+    photo      String?
+    email      String    @unique
+    password   String?
+    status     Int       @default(0)
+    verifiedAt DateTime?
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+}
+
+model MessageGroup {
+    id        Int       @id @default(autoincrement())
+    userId    Int
+    doctorId  Int
+    finish    Boolean   @default(false)
+    status    Int       @default(0)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    Message   Message[]
+}
+
+model Message {
+    id             Int          @id @default(autoincrement())
+    messageGroupId Int
+    sender         Int
+    recipient      Int
+    fromUser       Boolean      @default(true)
+    content        String?      @db.Text
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+    messageGroup   MessageGroup @relation(fields: [messageGroupId], references: [id])
+}
+
+model Chatbot {
+    id        Int      @id @default(autoincrement())
+    question  String   @db.LongText
+    answer    String?  @db.LongText
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
