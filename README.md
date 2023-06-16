@@ -44,6 +44,6 @@ The Herbify API Backend is released under the MIT License. Please review the [LI
 
 ## Contact
 
-For any inquiries or support regarding the Herbify API Backend, please contact our support team at support@herbify.com.
+For any inquiries or support regarding the Herbify API Backend, please contact our support team at indo.herbify@gmail.com
 
 We hope you find the Herbify API Backend useful for your healthcare application!
