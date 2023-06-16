@@ -193,6 +193,10 @@ class MessageController {
         },
       });
 
+      req.io?.emit(`send_message`, {
+        idUser: data.recipient,
+        fromUser: data.fromUser,
+      });
       res.status(201).json({
         message: `Successfully send a message`,
         data,
